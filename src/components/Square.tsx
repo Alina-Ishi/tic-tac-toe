@@ -8,21 +8,25 @@ interface SquareProps {
 }
 
 const Square: React.FC<SquareProps> = ({ value, onSquareClick, isWinning }) => {
+  const getColor = () => {
+    if (value === 'X') return 'text-red-600';
+    if (value === 'O') return 'text-green-600';
+    return 'text-gray-800';
+  };
+
   return (
     <button
       className={`
-        w-20 h-20 sm:w-24 sm:h-24 
-        border-2 border-gray-700 
-        text-4xl sm:text-5xl font-bold 
+        w-24 h-24 sm:w-28 sm:h-28 
+        border-4 border-indigo-300 
+        text-5xl sm:text-6xl font-bold 
         flex items-center justify-center
         transition-all duration-200 
-        hover:bg-gray-100 hover:scale-105
-        focus:outline-none focus:ring-2 focus:ring-blue-400
-        ${isWinning 
-          ? 'bg-yellow-300 text-orange-700 border-orange-600 shadow-lg shadow-yellow-500/50' 
-          : 'bg-gray-50 text-gray-800'
-        }
-        ${value === 'X' ? 'text-blue-600' : 'text-red-600'}
+        hover:bg-indigo-50 hover:scale-105
+        focus:outline-none focus:ring-4 focus:ring-indigo-400
+        rounded-xl shadow-md
+        ${getColor()}
+        ${isWinning ? 'winning-cell animate-win-pulse' : 'bg-white'}
       `}
       onClick={onSquareClick}
       aria-label={`Клетка ${value || 'пустая'}`}

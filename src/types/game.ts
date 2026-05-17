@@ -6,3 +6,9 @@ export interface WinnerInfo {
   winner: Player;
   line: number[];
 }
+
+export interface Move {
+  index: number;
+  player: Player;
+  position: string;
+}
