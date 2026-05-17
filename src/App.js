@@ -1,160 +1,109 @@
-// App.js
 import React, { useState } from 'react';
-import styles from './App.module.css';
+import './App.css'; // Подключим стили ниже
 
-function App() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [expandedNewsId, setExpandedNewsId] = useState(null);
+// Компонент одной клетки
+const Square = ({ value, onSquareClick, isWinning }) => {
+  return (
+    <button 
+      className={`square ${isWinning ? 'winning' : ''}`} 
+      onClick={onSquareClick}
+    >
+      {value}
+    </button>
+  );
+};
 
-  const collections = [
-    {
-      title: 'Кровеносная система человека',
-      author: 'Сергей МАРКОН',
-      photoCredit: 'Фото: msk_art',
-      photoLink: 'https://www.flickr.com/photos/msk_art',
-    },
-    {
-      title: 'Мочеполовая система человека',
-      author: 'Олег СТЕПАНОВ',
-      photoCredit: 'Фото: olegst',
-      photoLink: 'https://www.flickr.com/photos/olegst',
-    },
-    {
-      title: 'Опорно-двигательная система',
-      author: 'Денис ДИМЧЕНКО',
-      photoCredit: 'Фото: dimch',
-      photoLink: 'https://www.flickr.com/photos/dimch',
-    },
-  ];
+// Основной компонент игры
+const App = () => {
+  const [squares, setSquares] = useState(Array(9).fill(null));
+  const [xIsNext, setXIsNext] = useState(true);
+  const [winnerInfo, setWinnerInfo] = useState(null); // { winner, line }
 
-  const news = [
-    {
-      id: 1,
-      title: 'Открытие выставки работ, присланных на Международный конкурс анатомического рисунка "V-Anatemnо Art - 2026"',
-      summary: 'Открытие выставки работ, присланных на Международный конкурс анатомического рисунка "V-Anatemnо Art - 2026"',
-      fullText: 'Выставка пройдёт в главном корпусе университета с 1 по 30 июня. В экспозицию вошли лучшие работы студентов и профессиональных художников из 15 стран мира. Приглашаются все желающие. Вход свободный.',
-    },
-  ];
-
-  const toggleNews = (id) => {
-    setExpandedNewsId(expandedNewsId === id ? null : id);
+  // Функция для определения победителя
+  const calculateWinner = (squares) => {
+    const lines = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8], // строки
+      [0, 3, 6], [1, 4, 7], [2, 5, 8], // колонки
+      [0, 4, 8], [2, 4, 6]             // диагонали
+    ];
+    for (let i = 0; i < lines.length; i++) {
+      const [a, b, c] = lines[i];
+      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+        return { winner: squares[a], line: lines[i] };
+      }
+    }
+    return null;
   };
 
-  const isSearchDisabled = searchQuery.trim() === '';
+  // Обработка клика по клетке
+  const handleClick = (i) => {
+    // Если уже есть победитель или клетка занята — игнорируем
+    if (winnerInfo || squares[i]) return;
+
+    const newSquares = squares.slice();
+    newSquares[i] = xIsNext ? 'X' : 'O';
+    setSquares(newSquares);
+    
+    const winner = calculateWinner(newSquares);
+    if (winner) {
+      setWinnerInfo(winner);
+    } else {
+      setXIsNext(!xIsNext);
+    }
+  };
+
+  // Сброс игры
+  const resetGame = () => {
+    setSquares(Array(9).fill(null));
+    setXIsNext(true);
+    setWinnerInfo(null);
+  };
+
+  // Определяем статус игры
+  let status;
+  if (winnerInfo) {
+    status = `Победитель: ${winnerInfo.winner}! 🎉`;
+  } else if (squares.every(sq => sq !== null)) {
+    status = 'Ничья! 🤝';
+  } else {
+    status = `Следующий ход: ${xIsNext ? 'X' : 'O'}`;
+  }
+
+  // Рендер игрового поля с подсветкой выигрышной линии
+  const renderSquare = (i) => {
+    const isWinning = winnerInfo && winnerInfo.line.includes(i);
+    return (
+      <Square 
+        value={squares[i]} 
+        onSquareClick={() => handleClick(i)}
+        isWinning={isWinning}
+      />
+    );
+  };
 
   return (
-    <div className={styles.container}>
-      {/* Header */}
-      <header className={styles.header}>
-        <div className={styles.logo}>РГПУ</div>
-        <button
-          className={styles.burger}
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Меню"
-        >
-          ☰
-        </button>
-        <nav className={`${styles.nav} ${mobileMenuOpen ? styles.navOpen : ''}`}>
-          <button className={styles.navLink} onClick={() => console.log('Навигация на Главную')}>Главная</button>
-          <button className={styles.navLink} onClick={() => console.log('Навигация на Университет')}>Университет</button> 
-          <button className={styles.navLink} onClick={() => console.log('Навигация на Виртуальные музеи')}>Виртуальные музеи</button>
-          <button className={styles.navLink} onClick={() => console.log('Навигация на Анатомический музей')}>Анатомический музей</button>
-        </nav>
-      </header>
-
-      {/* Breadcrumbs */}
-     <div className={styles.breadcrumbs}>
-  <button className={styles.breadcrumbButton}>Главная</button> ▶ 
-  <button className={styles.breadcrumbButton}>Университет</button> ▶ 
-  <button className={styles.breadcrumbButton}>Виртуальные музеи и пространства</button> ▶ 
-  <span>Анатомический музей</span>
-</div>
-
-      {/* Search */}
-      <div className={styles.searchSection}>
-        <input
-          type="text"
-          placeholder="Поиск по музею"
-          className={styles.searchInput}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        <button className={styles.searchButton} disabled={isSearchDisabled}>
-          Найти
-        </button>
-      </div>
-
-      {/* Tabs */}
-      <div className={styles.tabs}>
-        <button className={`${styles.tab} ${styles.activeTab}`}>Коллекции и экспонаты</button>
-        <button className={styles.tab}>Новости музея</button>
-        <button className={styles.tab}>Контакты</button>
-        <button className={styles.tab}>Расположение</button>
-      </div>
-
-      {/* Hero */}
-      <section className={styles.hero}>
-        <h1>Анатомический музей</h1>
-        <p className={styles.heroText}>
-          Фонды музея включают уникальные коллекции влажных и сухих анатомических препаратов,
-          образцы микроскопической и экспериментальной техники, а также наборы учебных таблиц XIX – XX веков.
-          Музейные коллекции расположены в специализированном помещении, оборудованном демонстрационными шкафами и витринами.
-        </p>
-        <button className={styles.detailsButton}>Подробнее ▶</button>
-      </section>
-
-      {/* Collections */}
-      <section className={styles.section}>
-        <h2>Коллекции и экспонаты</h2>
-        <div className={styles.grid}>
-          {collections.map((item, idx) => (
-            <div key={idx} className={styles.card}>
-              <h3>{item.title}</h3>
-              <p className={styles.author}>{item.author}</p>
-              <a href={item.photoLink} className={styles.photoLink} target="_blank" rel="noopener noreferrer">
-                {item.photoCredit}
-              </a>
-            </div>
-          ))}
+    <div className="game">
+      <div className="game-board">
+        <div className="status">{status}</div>
+        <div className="board-row">
+          {renderSquare(0)}
+          {renderSquare(1)}
+          {renderSquare(2)}
         </div>
-      </section>
-
-      {/* News */}
-      <section className={styles.section}>
-        <h2>Новости музея</h2>
-        <div className={styles.newsList}>
-          {news.map((item) => (
-            <div key={item.id} className={styles.newsItem}>
-              <h3>{item.title}</h3>
-              <p>{item.summary}</p>
-              {expandedNewsId === item.id && <p className={styles.fullText}>{item.fullText}</p>}
-              <button onClick={() => toggleNews(item.id)} className={styles.readMore}>
-                {expandedNewsId === item.id ? 'Свернуть ▲' : 'Подробнее ▶'}
-              </button>
-            </div>
-          ))}
+        <div className="board-row">
+          {renderSquare(3)}
+          {renderSquare(4)}
+          {renderSquare(5)}
         </div>
-      </section>
-
-      {/* Contacts + Location */}
-      <div className={styles.infoGrid}>
-        <section className={styles.contacts}>
-          <h2>Контакты</h2>
-          <p><strong>Смотритель музея:</strong> Дария Михайловна Карошевская</p>
-          <p><strong>Тел.:</strong> +7 ХХХ YYY NN NN</p>
-          <p><strong>Почта:</strong> xxx@mail.ru</p>
-          <button className={styles.vkButton}>Мы в VK ▶</button>
-        </section>
-
-        <section className={styles.location}>
-          <h2>Расположение</h2>
-          <p>Казанская ул., 35, корпус 3</p>
-          <p>Факультет биологии</p>
-        </section>
+        <div className="board-row">
+          {renderSquare(6)}
+          {renderSquare(7)}
+          {renderSquare(8)}
+        </div>
+        <button className="reset-btn" onClick={resetGame}>Начать заново</button>
       </div>
     </div>
   );
-}
+};
 
 export default App;
