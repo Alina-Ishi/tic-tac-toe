@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* Добавляем кастомные стили поверх Tailwind */
+@layer components {
+  .game-container {
+    @apply min-h-screen bg-linear-to-br from-slate-800 via-purple-900 to-indigo-900 
+           flex items-center justify-center p-4;
+  }
+  
+  .game-board {
+    @apply bg-white rounded-xl p-6 sm:p-8 shadow-xl;
+  }
+  
+  .status-text {
+    @apply mb-6 text-center text-xl sm:text-2xl font-bold py-3 px-4 rounded-lg;
+  }
+  
+  .reset-button {
+    @apply mt-8 w-full py-3 px-6 bg-linear-to-r from-indigo-600 to-purple-600 
+           text-white font-bold text-lg rounded-lg
+           hover:from-indigo-700 hover:to-purple-700 
+           transform hover:scale-105 transition-all duration-200
+           shadow-lg hover:shadow-xl;
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+  }
+  
+  .animate-win {
+    animation: winPulse 0.8s ease-in-out 3;
+  }
+}
